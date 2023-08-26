@@ -5,7 +5,7 @@ from sqlalchemy import INTEGER, Sequence, String, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 
 from app.database.base import Base, TableNameMixin
-from app.setup import SessionLocal
+from app.session import SessionLocal
 
 
 def get_db() -> Session:

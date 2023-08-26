@@ -1,19 +1,18 @@
 import json
 
-import httpx
-import requests
-
-from app.schemas import UserCreate, ConversationCreate, MessageBase, UserUpdate
+from api_client import APIClient
+from app.schemas import UserCreate, ConversationCreate, MessageBase, UserUpdate, UserResponse
 from cli_utils import format_conversations
 
 
 class Chat:
-    def __init__(self, user_id: str):
+    def __init__(self, user_id: str, base_url: str):
         self.user = UserCreate(user_id=user_id)
-        self._create_user()
+        self.api_client = APIClient(base_url=base_url)
         self.conversation = ConversationCreate(user_id=user_id, text="")
 
     def process(self):
+        self._create_user()
         while True:
             user_input = input("You: ")
             if user_input.lower() == "exit":
@@ -29,16 +28,16 @@ class Chat:
                 self._handle_query(category='users', user_query="Enter a keyword to search for: ")
 
             else:
-                completion = self._send_message(MessageBase(prompt=user_input))
+                completion = self.api_client.send_message(MessageBase(prompt=user_input))
                 self.conversation.text += f"GPT: {completion}\n"
                 print(f"GPT: {completion}")
 
-        self._create_conversation()
-        _update_user_words(UserUpdate(user_id=self.user.user_id, text=self.conversation.text))
+        self.api_client.create_conversation(conversation=self.conversation)
+        self.api_client.update_user_words(user_id=self.user.user_id, words=UserUpdate(words=self.conversation.text))
 
     def _handle_query(self, category: str, user_query: str):
         value = input(user_query)
-        retrieved_data = self._get_data_requested(category=category, query=value)
+        retrieved_data = self.api_client.get_data_requested(category=category, query=value)
         self.conversation.text += f"{user_query}: {value}\n {category} found: {retrieved_data}\n"
         if category == 'conversations':
             retrieved_data = json.dumps(format_conversations(retrieved_data), indent=4)
@@ -46,48 +45,7 @@ class Chat:
         print(f"{category}: {retrieved_data}")
 
     def _create_user(self):
-        url = "http://localhost:8000/users"
-        payload = {
-            "user_id": self.user.user_id
-        }
-        response = requests.post(url, json=payload)
-        return response.content
-
-    @staticmethod
-    def _get_data_requested(category: str, query: str):
-        url = f"http://localhost:8000/{category}/{query}"
-
-        with httpx.Client() as client:
-            response = client.get(url)
-            return response.content
-
-    @staticmethod
-    def _send_message(message: MessageBase):
-        url = "http://localhost:8000/chat"
-        payload = {
-            "prompt": message.prompt
-        }
-        response = requests.get(url, json=payload)
-        return response.content
-
-    def _create_conversation(self):
-        url = "http://localhost:8000/conversation/"
-        payload = {
-            "user_id": self.conversation.user_id,
-            "text": self.conversation.text
-        }
-        response = requests.post(url, json=payload)
-        return response.content
-
-
-def _update_user_words(user: UserUpdate):
-    url = "http://localhost:8000/users_words"
-    payload = {
-        "user_id": user.user_id,
-        "text": user.text
-    }
-    response = requests.put(url, json=payload)
-    return response.content
+        self.api_client.create_user(user=self.user)
 
 
 def main():
@@ -97,7 +55,8 @@ def main():
           "\n\n Lets start by telling us your name.")
     user_name = input("You: ")
     print('Thank you, lets start chatting!')
-    chat = Chat(user_name)
+
+    chat = Chat(user_id=user_name, base_url="http://localhost:8000")
     chat.process()
 
 

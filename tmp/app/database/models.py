@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import INTEGER, Sequence, String, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database.base import Base, TableNameMixin
+from tmp.app.database.base import Base, TableNameMixin
 
 
 class Conversation(Base, TableNameMixin):

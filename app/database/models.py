@@ -2,18 +2,9 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import INTEGER, Sequence, String, ForeignKey, TIMESTAMP, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base, TableNameMixin
-from app.session import SessionLocal
-
-
-def get_db() -> Session:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class Conversation(Base, TableNameMixin):

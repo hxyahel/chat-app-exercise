@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -23,13 +25,13 @@ def create_conversation(db: Session, user_id: str, text: str) -> Conversation:
     return db_message
 
 
-def get_conversations_by_user(db: Session, user: str):
+def get_conversations_by_user(db: Session, user: str) -> Sequence[Conversation]:
     stmt = select(Conversation).where(Conversation.user_id == user)
     result = db.execute(stmt)
     return result.scalars().all()
 
 
-def get_users_by_keyword(db: Session, keyword: str):
+def get_users_by_keyword(db: Session, keyword: str) -> Sequence[str]:
     stmt = select(User.user_id).where(User.words.ilike(f"%{keyword}%"))
     result = db.execute(stmt)
     return result.scalars().all()

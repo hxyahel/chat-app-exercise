@@ -3,7 +3,7 @@ from typing import Sequence
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from tmp.app.database.models import Conversation, User
+from app.database.models import Conversation, User
 
 
 def create_user(db: Session, user_id: str) -> User:

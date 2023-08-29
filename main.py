@@ -7,10 +7,12 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.session import get_db
 from app.schemas import UserCreate, ConversationCreate, MessageBase, UserUpdate, ConversationResponse, UserResponse
+from app.toxicity_model import ToxicityDetector
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 app = FastAPI()
+toxicity_model = ToxicityDetector()
 
 
 @app.post("/users", status_code=201, response_model=UserCreate)
@@ -20,7 +22,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/chat")
-def get_chatgpt_response(message: MessageBase) -> str:
+def get_chatgpt_response(message: MessageBase, block_toxic_prompts: bool = False) -> str:
+    if block_toxic_prompts:
+        is_toxic, toxicity_score = toxicity_model.predict(message.prompt)
+        if is_toxic:
+            print(f"Detected toxicity in prompt: {message.prompt} with score: {toxicity_score}")
+            return "I am sorry, I can't say that. Please be nice."
+
     messages = [{"role": "user", "content": message.prompt}]
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",

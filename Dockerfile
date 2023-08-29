@@ -1,5 +1,8 @@
 FROM python:3.9-slim
 
+## Set the DOCKER_BUILDKIT environment variable
+ENV TRANSFORMERS_CACHE=/hf_cache
+
 # Set the working directory to /app
 WORKDIR /app
 
@@ -7,6 +10,7 @@ WORKDIR /app
 COPY . .
 
 # Install any needed packages specified in requirements.txt
+RUN pip3 install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 8000 available to the world outside this container

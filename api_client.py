@@ -6,7 +6,7 @@ from app.schemas import MessageBase, ConversationCreate, UserUpdate, UserCreate
 class APIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.client = httpx.Client()
+        self.client = httpx.Client(timeout=httpx.Timeout(10.0, read=30.0))
 
     def create_user(self, user: UserCreate):
         url = f"{self.base_url}/users"
@@ -21,10 +21,11 @@ class APIClient:
         response = self.client.get(url)
         return response.json()
 
-    def send_message(self, message: MessageBase):
+    def send_message(self, message: MessageBase, block_toxic_prompts: bool = False):
         url = f"{self.base_url}/chat"
         payload = {
-            "prompt": message.prompt
+            "prompt": message.prompt,
+            "block_toxic_prompts": block_toxic_prompts
         }
         response = self.client.post(url, json=payload)
         return response.json()

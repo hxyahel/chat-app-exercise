@@ -6,10 +6,11 @@ from cli_utils import format_conversations
 
 
 class Chat:
-    def __init__(self, user_id: str, base_url: str):
+    def __init__(self, user_id: str, base_url: str, block_toxic_prompts: bool = False):
         self.user = UserCreate(user_id=user_id)
         self.api_client = APIClient(base_url=base_url)
         self.conversation = ConversationCreate(user_id=user_id, text="")
+        self.block_toxic_prompts = block_toxic_prompts
 
     def process(self):
         self._create_user()
@@ -28,7 +29,8 @@ class Chat:
                 self._handle_query(category='users', user_query="Enter a keyword to search for: ")
 
             else:
-                completion = self.api_client.send_message(MessageBase(prompt=user_input))
+                completion = self.api_client.send_message(MessageBase(prompt=user_input),
+                                                          block_toxic_prompts=self.block_toxic_prompts)
                 self.conversation.text += f"GPT: {completion}\n"
                 print(f"GPT: {completion}")
 

@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.session import get_db
-from app.schemas import UserCreate, ConversationCreate, MessageBase, UserUpdate, ConversationResponse, UserResponse
+from app.schemas import UserCreate, NewConversation, MessageBase, UserUpdate, ConversationResponse, UserResponse
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 app = FastAPI()
+MODEL = "gpt-3.5-turbo"
 
 
 @app.post("/users", status_code=201, response_model=UserCreate)
@@ -23,7 +24,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 def get_chatgpt_response(message: MessageBase) -> str:
     messages = [{"role": "user", "content": message.prompt}]
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=MODEL,
         messages=messages,
         temperature=0,
     )
@@ -32,14 +33,14 @@ def get_chatgpt_response(message: MessageBase) -> str:
 
 
 @app.post("/conversation/", status_code=201, response_model=ConversationResponse)
-def create_conversation(conversation: ConversationCreate, db: Session = Depends(get_db)):
-    db_message = crud.create_conversation(db, conversation.user_id, conversation.text)
+def create_conversation(conversation: NewConversation, db: Session = Depends(get_db)):
+    db_message = crud.create_conversation(db, conversation)
     return db_message
 
 
-@app.get("/conversations/{user}", status_code=200)
-def get_conversations_by_user(user: str, db: Session = Depends(get_db)):
-    conversations_by_user = crud.get_conversations_by_user(db, user)
+@app.get("/conversations/{user_id}", status_code=200, response_model=list[ConversationResponse])
+def get_conversations_by_user(user_id: str, db: Session = Depends(get_db)):
+    conversations_by_user = crud.get_conversations_by_user(db, user_id)
     return conversations_by_user
 
 

@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
-DATABASE_URL = "postgresql+psycopg2://chat_app_user:chat_app_password@db:5432/chat_app_db"
+from app.setting import DATABASE_URL
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -12,3 +13,4 @@ def get_db() -> Session:
         yield db
     finally:
         db.close()
+

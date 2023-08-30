@@ -1,0 +1,37 @@
+line-length = 120
+target-version = "py311"
+select = [
+    "ALL"
+]
+ignore = [
+    "A003",
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "COM812",
+    "D",
+    "DTZ",
+    "EXE002",
+    "FBT001",
+    "FBT002",
+    "FBT003",
+    "FIX002",
+    "G004",
+    "PERF203",
+    "PGH003",
+    "PTH",
+    "SLOT000",
+    "TD",
+    "W605",
+]
+exclude = ["alembic"]
+
+
+[pylint]
+max-args = 7
+max-branches = 7
+
+[mccabe]
+max-complexity = 8
+
+

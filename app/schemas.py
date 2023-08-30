@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel
 
@@ -9,7 +8,7 @@ class ConversationBase(BaseModel):
     text: str
 
 
-class ConversationCreate(ConversationBase):
+class NewConversation(ConversationBase):
     pass
 
 
@@ -22,7 +21,7 @@ class ConversationResponse(ConversationBase):
 
 
 class ConversationSearchResult(BaseModel):
-    conversations: List[ConversationResponse]
+    conversations: list[ConversationResponse]
 
 
 class UserCreate(BaseModel):
@@ -41,7 +40,7 @@ class UserResponse(UserCreate):
 
 
 class UserSearchResult(BaseModel):
-    users: List[str]
+    users: list[str]
 
 
 class MessageBase(BaseModel):
